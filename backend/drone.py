@@ -20,6 +20,7 @@ class Drone:
         self.is_paused = False
         self.mission_route = []
         self.mission_current_route = []
+        self.current_mission_id = 0
 
     def get_telemetry(self):
         """Zwraca kopię danych do wysłania do frontendu"""

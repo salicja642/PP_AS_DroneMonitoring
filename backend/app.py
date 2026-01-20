@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, request, send_file
 from flask_socketio import SocketIO
 import threading
+import time
 
 # Importujemy nasze nowe moduły
 from drone import Drone
@@ -27,13 +28,25 @@ def login():
 
 @app.route("/start_mission", methods=["POST"])
 def start_mission():
+    # 1. Generujemy nowe, unikalne ID dla tej misji
+    new_mission_id = int(time.time() * 1000)
+    drone.current_mission_id = new_mission_id
+    
+    # 2. Ustawiamy stan drona
     route = request.get_json()
     drone.mission_route = route
     drone.is_in_mission = True
     drone.is_paused = False
     
-    threading.Thread(target=simulator.simulate_flight, args=(drone, socketio), daemon=True).start()
-    return jsonify({"status": "mission_started"})
+    # 3. Odpalamy wątek, ale przekazujemy mu jego ID
+    threading.Thread(
+        target=simulator.simulate_flight, 
+        args=(drone, socketio, new_mission_id), # <-- Dodajemy mission_id
+        daemon=True
+    ).start()
+    
+    print(f"DEBUG: Started Mission ID {new_mission_id}")
+    return jsonify({"status": "mission_started", "mission_id": new_mission_id})
 
 
 @app.route("/telemetry")

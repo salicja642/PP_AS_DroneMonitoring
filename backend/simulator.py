@@ -2,7 +2,7 @@
 import cv2
 import base64
 import wave
-from utils import reached_target
+from utils import reached_target, distance
 import random
 
 def simulate_drone(drone, socketio):
@@ -58,12 +58,15 @@ def audio_stream(socketio):
         print("Audio file not found, skipping audio stream.")
 
 
-def simulate_flight(drone, socketio):
+def simulate_flight(drone, socketio, mission_id):
     """Logika aktywnej misji drona po wyznaczonych punktach."""
     drone.mission_current_route = list(drone.mission_route)
     print("MISSION: start flight route.")
 
     while drone.is_in_mission and drone.mission_current_route:
+        if drone.current_mission_id != mission_id:
+            print(f"MISSION {mission_id}: Detected new mission. Terminating old thread.")
+            return
         
         # obsługa pauzy
         while drone.is_paused:
@@ -95,10 +98,11 @@ def simulate_flight(drone, socketio):
 
         if reached_target(drone.latitude, drone.longitude, wp["lat"], wp["lng"]):
             with drone._lock:
-                drone.latitude = wp['lat']
-                drone.longitude = wp["lng"]
-                drone.speed = 0.0
-                drone.mission_current_route.pop(0) # usuwamy zaliczony punkt
+                if drone.mission_current_route:
+                    drone.latitude = wp['lat']
+                    drone.longitude = wp["lng"]
+                    drone.speed = 0.0
+                    drone.mission_current_route.pop(0) # usuwamy zaliczony punkt
 
             socketio.emit("telemetry", drone.get_telemetry())
             print(f"MISSION: reached waypoint. Remaining: {len(drone.mission_current_route)}")
