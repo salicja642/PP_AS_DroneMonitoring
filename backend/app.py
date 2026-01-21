@@ -2,11 +2,9 @@ from flask import Flask, jsonify, request, send_file
 from flask_socketio import SocketIO
 import threading
 import time
-
-# Importujemy nasze nowe moduły
+import sqlite3
 from drone import Drone
 import simulator
-
 
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*")
@@ -15,6 +13,21 @@ drone = Drone()
 
 #logowanie
 users = {"admin": "admin123", "student": "test123"}
+
+#baza danych
+def init_db():
+    conn = sqlite3.connect('drone_missions.db')
+    c = conn.cursor()
+    c.execute('''CREATE TABLE IF NOT EXISTS history 
+                 (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                  name TEXT,                 
+                  timestamp DATETIME DEFAULT CURRENT_TIMESTAMP, 
+                  route_json TEXT)''')
+    conn.commit()
+    conn.close()
+
+init_db()
+
 
 @app.route("/login", methods=["POST"])
 def login():
@@ -28,20 +41,20 @@ def login():
 
 @app.route("/start_mission", methods=["POST"])
 def start_mission():
-    # 1. Generujemy nowe, unikalne ID dla tej misji
+    # ID misji
     new_mission_id = int(time.time() * 1000)
     drone.current_mission_id = new_mission_id
     
-    # 2. Ustawiamy stan drona
+    # stan drona
     route = request.get_json()
     drone.mission_route = route
     drone.is_in_mission = True
     drone.is_paused = False
     
-    # 3. Odpalamy wątek, ale przekazujemy mu jego ID
+    # przekazanie id
     threading.Thread(
         target=simulator.simulate_flight, 
-        args=(drone, socketio, new_mission_id), # <-- Dodajemy mission_id
+        args=(drone, socketio, new_mission_id), 
         daemon=True
     ).start()
     

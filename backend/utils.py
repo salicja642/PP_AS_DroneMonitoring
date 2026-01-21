@@ -1,6 +1,5 @@
 import math
 
-#misja drona
 def distance(lat1, lon1, lat2, lon2):
     """Odległość w metrach między dwoma punktami GPS"""
     R = 6371000

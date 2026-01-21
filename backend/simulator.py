@@ -9,26 +9,24 @@ def simulate_drone(drone, socketio):
     """Pętla czuwania: obsługuje zużycie baterii, gdy dron nie jest w misji."""
     while True:
         if drone.is_running and not drone.is_in_mission:
-            # Dron włączony, ale czeka (minimalne zużycie baterii)
             drone.apply_battery_drain(0.005)
             drone.speed = 0.0
         
         elif not drone.is_running:
-            # Dron wyłączony - parametry stałe
             drone.speed = 0.0
             
         socketio.sleep(1)
 
 
 def telemetry_loop(drone, socketio):
-    """Stała pętla wysyłająca stan drona do Reacta."""
+    """Stała pętla wysyłająca stan drona"""
     while True:
         socketio.emit("telemetry", drone.get_telemetry())
         socketio.sleep(1)
 
 
 def video_stream(socketio):
-    cap = cv2.VideoCapture("drone_video.mp4")  # film symulujący kamerkę
+    cap = cv2.VideoCapture("drone_video.mp4") 
     while True:
         ret, frame = cap.read()
         if not ret:
@@ -40,20 +38,20 @@ def video_stream(socketio):
         frame_base64 = base64.b64encode(buffer).decode("utf-8")
 
         socketio.emit("video_frame", frame_base64)
-        socketio.sleep(0.05)  # ~20 FPS
+        socketio.sleep(0.05)  
 
 def audio_stream(socketio):
     """Strumieniowanie dźwięku silnika drona."""
     try:
-        wf = wave.open("drone_engine_audio.wav", "rb")   # ← plik WAV w folderze backend
-        chunk_size = 1024                    # paczka 1024 bajty
+        wf = wave.open("drone_engine_audio.wav", "rb")  
+        chunk_size = 1024                    
         while True:
             chunk = wf.readframes(chunk_size)
             if len(chunk) == 0:
-                wf.rewind()                  # zapętlenie
+                wf.rewind()                 
                 continue
             socketio.emit("audio_chunk", chunk)
-            socketio.sleep(0.05)  # ~50ms
+            socketio.sleep(0.05)  
     except FileNotFoundError:
         print("Audio file not found, skipping audio stream.")
 
@@ -68,7 +66,6 @@ def simulate_flight(drone, socketio, mission_id):
             print(f"MISSION {mission_id}: Detected new mission. Terminating old thread.")
             return
         
-        # obsługa pauzy
         while drone.is_paused:
             drone.speed = 0.0
             socketio.emit("telemetry", drone.get_telemetry()) 
@@ -102,7 +99,7 @@ def simulate_flight(drone, socketio, mission_id):
                     drone.latitude = wp['lat']
                     drone.longitude = wp["lng"]
                     drone.speed = 0.0
-                    drone.mission_current_route.pop(0) # usuwamy zaliczony punkt
+                    drone.mission_current_route.pop(0)
 
             socketio.emit("telemetry", drone.get_telemetry())
             print(f"MISSION: reached waypoint. Remaining: {len(drone.mission_current_route)}")

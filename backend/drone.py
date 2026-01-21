@@ -3,7 +3,6 @@ import threading
 
 class Drone:
     def __init__(self):
-        # Zapobieganie konfliktom
         self._lock = threading.Lock()
 
         # Stan drona
@@ -39,12 +38,12 @@ class Drone:
             }
         
     def update_position(self, lat, lng):
-        """Bezpieczna aktualizacja pozycji."""
+        """Aktualizacja pozycji"""
         with self._lock:
             self.latitude = round(lat, 6)
             self.longitude = round(lng, 6)
 
     def apply_battery_drain(self, amount):
-        """Zmniejsza poziom baterii, dbając o to, by nie spadł poniżej 0."""
+        """Zmniejsza poziom baterii"""
         with self._lock:
             self.battery = max(0, self.battery - amount)

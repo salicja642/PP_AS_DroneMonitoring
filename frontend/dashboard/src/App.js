@@ -34,11 +34,10 @@ function NavTabs() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Ustal aktywną zakładkę na podstawie ścieżki
   const currentTab = location.pathname;
 
   const handleChange = (event, newValue) => {
-    navigate(newValue); // zmienia URL i komponent
+    navigate(newValue); 
   };
 
   return (

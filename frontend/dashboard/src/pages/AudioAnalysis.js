@@ -5,7 +5,6 @@ function AudioAnalysis() {
   const waveformRef = useRef(null);
   const wavesurfer = useRef(null);
 
-  // Tworzenie WaveSurfer po załadowaniu komponentu
   useEffect(() => {
     wavesurfer.current = WaveSurfer.create({
       container: waveformRef.current,
@@ -15,7 +14,6 @@ function AudioAnalysis() {
       height: 100,
     });
 
-    // Ładujemy plik z backendu
     wavesurfer.current.load("/audio");
 
     return () => {
@@ -28,7 +26,6 @@ function AudioAnalysis() {
       <h1>🎧 Analiza dźwięku</h1>
       <p>Wizualizacja przebiegu fali dźwięku silnika drona.</p>
 
-      {/* MIEJSCE NA WAVESURFER */}
       <div
         ref={waveformRef}
         style={{
@@ -39,7 +36,6 @@ function AudioAnalysis() {
         }}
       ></div>
 
-      {/* PRZYCISKI */}
       <button
         onClick={() => wavesurfer.current.playPause()}
         style={{ margin: 10, padding: "10px 20px" }}
