@@ -10,14 +10,6 @@ import {
   Tab
 } from "@mui/material";
 
-import {
-  PlayArrow,
-  Stop,
-  Edit as EditIcon,
-  RocketLaunch,
-  Delete as DeleteIcon
-} from "@mui/icons-material";
-
 import HomeIcon from "@mui/icons-material/Home";
 import SensorsIcon from "@mui/icons-material/Sensors";
 
