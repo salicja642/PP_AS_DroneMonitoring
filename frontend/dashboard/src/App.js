@@ -5,13 +5,7 @@ import Telemetry from "./pages/Telemetry";
 import { useState } from "react";
 
 import { 
-  Button,
-  Paper,
-  Typography,
   Box,
-  Stack,
-  TextField,
-  Input,
   Tabs,
   Tab
 } from "@mui/material";
@@ -26,7 +20,6 @@ import {
 
 import HomeIcon from "@mui/icons-material/Home";
 import SensorsIcon from "@mui/icons-material/Sensors";
-import AudiotrackIcon from "@mui/icons-material/Audiotrack";
 
 
 function NavTabs() {

@@ -5,10 +5,8 @@ import MissionHistory from "../components_telemetry/MissionHistory.js";
 const TelemetryPanel = ({ data, videoFrame, setRoute, route }) => {
   const inputStyle = { border: "1px solid #4c5ef7", borderRadius: 1, px: 1, py: 0.5, width: 200 };
   
-  // Zostawiamy tylko jedną referencję do dźwięku
   const audioRef = useRef(null);
 
-  // LOGIKA DŹWIĘKU: Prosta i szybka
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -20,10 +18,9 @@ const TelemetryPanel = ({ data, videoFrame, setRoute, route }) => {
     }
   }, [data.is_in_mission, data.is_paused]);
 
-  // OPCJONALNIE: Zmiana obrotów silnika przy przyspieszaniu
+
   useEffect(() => {
     if (audioRef.current && data.speed !== undefined) {
-      // Dźwięk staje się wyższy, gdy dron leci szybciej
       audioRef.current.playbackRate = 1 + (data.speed / 100);
     }
   }, [data.speed]);
@@ -80,7 +77,6 @@ const TelemetryPanel = ({ data, videoFrame, setRoute, route }) => {
       
       {/* Sekcja Video */}
       <Paper elevation={3} sx={{ p: 2, borderRadius: 2, bgcolor: "#f8f9fa" }}>
-        {/* WIDEO */}
         <Box sx={{ height: 200, display: "flex", alignItems: "center", justifyContent: "center", mb: 2, bgcolor: "#000", borderRadius: 1 }}>
           {videoFrame ? (
             <img src={videoFrame} alt="Dron" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center"}} />
@@ -89,7 +85,7 @@ const TelemetryPanel = ({ data, videoFrame, setRoute, route }) => {
           )}
         </Box>
 
-        <Typography sx={{ color: "#00ff00", fontSize: "12px", mb: 1, fontWeight: 'bold' }}>
+        <Typography variant="h5" sx={{ mb: 1, fontSize: "14px", fontWeight: 500 }}>
           AKTYWNA JEDNOSTKA: {data.drone_model_name || "PROFIL ZAŁADOWANY"}
         </Typography>
                 

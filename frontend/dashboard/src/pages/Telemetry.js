@@ -8,7 +8,6 @@ import ControlPanel from "../components_telemetry/ControlPanel.js";
 import TelemetryPanel from "../components_telemetry/TelemetryPanel.js";
 import DroneCharts from "../components_telemetry/DroneCharts.js";
 import DroneMap from "../components_telemetry/DroneMap.js";
-import MissionHistory from "../components_telemetry/MissionHistory.js";
 import { useLocation } from "react-router-dom";
 
 const theme = createTheme({
@@ -32,13 +31,11 @@ useEffect(() => {
 
   if (selectedModel) {
     console.log("Wykryto wybór modelu z URL:", selectedModel);
-    // Wysyłamy do backendu już ze strony Telemetrii
     fetch(`http://localhost:5000/select_drone/${selectedModel}`)
       .catch(err => console.error("Błąd synchronizacji modelu:", err));
   }
 }, [location]);
 
-  //Połączenie z backendem przez WebSocket
 
   useEffect(() => {
     isPausedRef.current = data.is_paused;
@@ -49,7 +46,6 @@ useEffect(() => {
     const socket = io("http://127.0.0.1:5000");
     socket.on("telemetry", (newData) => setData(newData));
     socket.on("video_frame", (frame) => {
-  // Usuwamy return, żeby zawsze wyświetlać to, co przychodzi z backendu
       setVideoFrame(frame);
     });
 
@@ -168,12 +164,12 @@ const handleMapClick = (e) => {
 
           <Box sx={{ 
             flex: 1.8, 
-            height: "100vh",      // Zajmuje 100% wysokości ekranu
-            overflowY: "auto",   // TYLKO ta kolumna będzie się przewijać, jeśli mapa + wykresy zajmą za dużo miejsca
-            paddingRight: "10px", // Trochę miejsca na pasek przewijania
+            height: "100vh",      
+            overflowY: "auto",   
+            paddingRight: "10px", 
             display: "flex",
             flexDirection: "column",
-            gap: "20px",
+            gap: "1px",
             boxSizing: "border-box"
           }}>
 

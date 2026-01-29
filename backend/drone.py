@@ -29,14 +29,14 @@ class Drone:
         with self._lock:
             self.model_id = model_id
             if model_id == "scout-x":
-                self.drain_rate = 0.05      # Szybki drenaż baterii
-                self.speed_multiplier = 2.5  # Bardzo szybki
+                self.drain_rate = 0.05      
+                self.speed_multiplier = 2.5  
                 self.max_speed_range = (18.0, 25.0)                
             elif model_id == "heavy-lift":
-                self.drain_rate = 0.01      # Bardzo oszczędny
-                self.speed_multiplier = 0.5  # Wolny i ociężały
+                self.drain_rate = 0.01      
+                self.speed_multiplier = 0.5  
                 self.max_speed_range = (4.0, 14.0)
-            else:  # profil standardowy
+            else: 
                 self.drain_rate = 0.02
                 self.speed_multiplier = 1.0
                 self.max_speed_range = (10.0, 14.0)
@@ -49,7 +49,6 @@ class Drone:
                 "heavy-lift": "HEAVY-LIFT (TRANSPORT)",
                 "standard": "STANDARD (BALANS)"
             }
-            # Pobieramy nazwę na podstawie zapisanego id (domyślnie 'standard')
             active_name = model_names.get(getattr(self, 'model_id', 'standard'), "PROFIL ZAŁADOWANY")
             return {
                 "altitude": self.altitude,

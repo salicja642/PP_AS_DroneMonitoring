@@ -21,18 +21,18 @@ const DroneMap = ({ data, isDrawing, route, startPoint, MapEventHandlers }) => {
     const currentPolylinePositions = currentFullRoute.map(p => [p.lat, p.lng]);
     return (
     <Box sx={{ width: "100%", height: "auto"}}>
-      <Typography variant="h6" sx={{ mb: 2, fontSize: "20px", fontWeight: 500 }}>
+      <Typography variant="h6" sx={{ mb: 1, fontSize: "20px", fontWeight: 500 }}>
         POZYCJA DRONA
       </Typography>
 
       {data.latitude && data.longitude ? (
-        <div style={{ height: "500px", width: "100%" }}> {/* Dodatkowy div pomocniczy */}
+        <div style={{ height: "500px", width: "100%" }}> 
           <MapContainer
             center={[data.latitude, data.longitude]}
             zoom={14}
-            scrollWheelZoom={true} // Włącz to, skoro mamy przewijaną kolumnę
+            scrollWheelZoom={true}
             style={{
-              height: "100%", // Teraz bierze 100% z tych 500px powyżej
+              height: "100%", 
               width: "100%",
               borderRadius: "10px",
               border: "1px solid #aaa",

@@ -8,7 +8,6 @@ const DroneCharts = ({ data }) => {
   const chartRefAltitude = useRef(null);
   const chartInstanceAltitude = useRef(null);
 
-  // Inicjalizacja
   useEffect(() => {
     const commonOptions = {
       animation: false,
@@ -57,7 +56,6 @@ const DroneCharts = ({ data }) => {
     };
   }, []);
 
-  // Aktualizacja
   useEffect(() => {
     if (chartInstanceSpeed.current && typeof data.speed === "number") {
       const speedData = chartInstanceSpeed.current.data.datasets[0].data;

@@ -1,4 +1,8 @@
-import { useState } from "react";
+import React, { useState } from "react";
+import { 
+  Box, Button, TextField, Typography, Container, Paper, Avatar, Alert 
+} from "@mui/material";
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 
 function Login({ onLogin }) {
   const [username, setUsername] = useState("");
@@ -22,35 +26,62 @@ function Login({ onLogin }) {
   };
 
   return (
-    <div style={{ width: "300px", margin: "100px auto", textAlign: "center" }}>
-      <h2>🔐 Logowanie</h2>
+    <Box sx={{ 
+      minHeight: "100vh", 
+      display: "flex", 
+      alignItems: "center", 
+      backgroundColor: "#ffb74d" 
+    }}>
+      <Container maxWidth="xs">
+        <Paper elevation={6} sx={{ p: 4, borderRadius: 3, textAlign: "center" }}>
+          <Avatar sx={{ m: "auto", bgcolor: "primary.main", mb: 2 }}>
+            <LockOutlinedIcon />
+          </Avatar>
+          
+          <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 1 }}>
+            Drone Monitoring
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+            Logowanie
+          </Typography>
 
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          placeholder="Login"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          style={{ width: "100%", padding: 8, marginBottom: 10 }}
-        />
-        <input
-          type="password"
-          placeholder="Hasło"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          style={{ width: "100%", padding: 8, marginBottom: 10 }}
-        />
+          <form onSubmit={handleSubmit}>
+            <TextField
+              margin="normal"
+              fullWidth
+              label="Login"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              variant="outlined"
+            />
+            <TextField
+              margin="normal"
+              fullWidth
+              label="Hasło"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              variant="outlined"
+            />
 
-        <button
-          type="submit"
-          style={{ width: "100%", padding: 10, background: "blue", color: "white" }}
-        >
-          Zaloguj
-        </button>
-      </form>
+            {error && (
+              <Alert severity="error" sx={{ mt: 2 }}>
+                {error}
+              </Alert>
+            )}
 
-      {error && <p style={{ color: "red" }}>{error}</p>}
-    </div>
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              sx={{ mt: 4, py: 1.5, fontWeight: 'bold' }}
+            >
+              ZALOGUJ
+            </Button>
+          </form>
+        </Paper>
+      </Container>
+    </Box>
   );
 }
 

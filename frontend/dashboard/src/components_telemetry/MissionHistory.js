@@ -44,7 +44,7 @@ const MissionHistory = ({ route, setRoute }) => {
       if (response.ok) {
         setOpen(false);
         setRouteName("");
-        loadHistory(); // Odświeżamy listę po zapisie
+        loadHistory();
       }
     } catch (error) {
       console.error("Błąd zapisu:", error);
@@ -54,7 +54,6 @@ const MissionHistory = ({ route, setRoute }) => {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       
-      {/* Przycisk zapisu na samej górze */}
       <Button
         variant="outlined"
         startIcon={<SaveIcon />}
@@ -117,7 +116,6 @@ const MissionHistory = ({ route, setRoute }) => {
         )}
       </List>
 
-      {/* Okienko (Modal) do wpisania nazwy */}
       <Dialog open={open} onClose={() => setOpen(false)}>
         <DialogTitle sx={{ fontSize: '18px' }}>Zapisz trasę</DialogTitle>
         <DialogContent>

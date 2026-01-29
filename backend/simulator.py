@@ -1,4 +1,3 @@
-# Funkcja symulująca lot drona
 import cv2
 import base64
 import wave
@@ -28,17 +27,15 @@ def telemetry_loop(drone, socketio):
 
 
 def video_stream(socketio, drone):
-    cap = None  # Na starcie kamera jest wyłączona
+    cap = None  
     is_live = False
 
     while True:
-        # WARUNEK: Kamera działa tylko gdy trwa misja I dron nie jest zapauzowany
         if drone.is_in_mission and not drone.is_paused:
             
-            # Jeśli kamera nie jest zainicjalizowana, spróbuj ją otworzyć
             if cap is None or not cap.isOpened():
                 print("SYSTEM: Inicjalizacja źródła obrazu...")
-                cap = cv2.VideoCapture(0)  # Próba otwarcia fizycznej kamery
+                cap = cv2.VideoCapture(0)  
                 is_live = True
 
                 if not cap.isOpened():
@@ -49,35 +46,27 @@ def video_stream(socketio, drone):
             ret, frame = cap.read()
             
             if ret:
-                # 1. Rozmiar klatki (optymalizacja pod transfer)
                 frame = cv2.resize(frame, (640, 360))
                 
-                # 2. Dodanie prostego statusu na obrazie
                 status_text = "LIVE" if is_live else "BACKUP VIDEO"
                 color = (0, 255, 0) if is_live else (0, 165, 255)
                 cv2.putText(frame, status_text, (15, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, color, 2)
 
-                # 3. Konwersja do Base64
                 _, buffer = cv2.imencode(".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), 70])
                 frame_base64 = base64.b64encode(buffer).decode("utf-8")
                 
-                # 4. Wysyłka do Reacta
                 socketio.emit("video_frame", f"data:image/jpeg;base64,{frame_base64}")
             else:
-                # Jeśli to był film i się skończył - zacznij od nowa
                 if not is_live:
                     cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
         
         else:
-            # JEŚLI PAUZA LUB KONIEC MISJI - Wyłączamy kamerę fizyczną
             if cap is not None:
                 print("SYSTEM: Zwalnianie zasobów kamery (Pauza/Stop).")
                 cap.release()
                 cap = None
-                # Opcjonalnie czyścimy obraz w React (wysyłając pusty sygnał)
                 socketio.emit("video_frame", None)
 
-        # Czekaj chwilę, żeby nie obciążać procesora (ok. 10-15 FPS wystarczy)
         socketio.sleep(0.07)
 
 def audio_stream(socketio):
