@@ -5,6 +5,7 @@ import time
 import sqlite3
 from drone import Drone
 import simulator
+import json
 
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*")
@@ -45,8 +46,9 @@ def start_mission():
     new_mission_id = int(time.time() * 1000)
     drone.current_mission_id = new_mission_id
     
-    # stan drona
-    route = request.get_json()
+    data = request.get_json()
+    # Zakładając, że teraz wysyłasz po prostu listę punktów lub obiekt z 'route'
+    route = data if isinstance(data, list) else data.get("route", [])
     drone.mission_route = route
     drone.is_in_mission = True
     drone.is_paused = False
@@ -61,6 +63,11 @@ def start_mission():
     print(f"DEBUG: Started Mission ID {new_mission_id}")
     return jsonify({"status": "mission_started", "mission_id": new_mission_id})
 
+@app.route("/select_drone/<model_id>") # Zmieniamy na GET z parametrem w URL
+def select_drone(model_id):
+    drone.set_profile(model_id)
+    print(f"SYSTEM: Wybrano profil przez URL: {model_id}")
+    return jsonify({"status": "selected", "model": model_id})
 
 @app.route("/telemetry")
 def telemetry():
@@ -93,8 +100,8 @@ def control(action):
             drone.is_paused = True
             print("MISJA: Wstrzymano (Pauza).")
         else: 
-            drone.is_runing = False
-            drone.is_in_missin = False
+            drone.is_running = False
+            drone.is_in_mission = False
             print("MISJA: Twardy stop symulacji.")
 
     return jsonify({
@@ -112,10 +119,58 @@ def update_position():
 
     return jsonify({"status": "ok", "new_position": drone.get_telemetry()})
 
+# endpointy do bazy danych
+
+@app.route("/save_route", methods=["POST"])
+def save_route():
+    data = request.get_json()
+    name = data.get("name", "Bez nazwy")
+    route = data.get("route", [])
+    
+    try:
+        conn = sqlite3.connect('drone_missions.db')
+        c = conn.cursor()
+        # json.dumps zamienia listę obiektów na tekst, który zmieści się w kolumnie TEXT
+        c.execute("INSERT INTO history (name, route_json) VALUES (?, ?)", 
+                  (name, json.dumps(route)))
+        conn.commit()
+        conn.close()
+        print("Zapisano w bazie")
+        return jsonify({"status": "ok", "message": "Trasa zapisana poprawnie!"})
+    except Exception as e:
+        print(f"!!! BŁĄD BAZY: {e}")
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+@app.route("/get_history", methods=["GET"])
+def get_history():
+    search = request.args.get('search', '') 
+    try:
+        conn = sqlite3.connect('drone_missions.db')
+        c = conn.cursor()
+        
+        if search:
+            
+            c.execute("SELECT id, name, timestamp, route_json FROM history WHERE name LIKE ? ORDER BY timestamp DESC", 
+                      (f'%{search}%',))
+        else:
+            c.execute("SELECT id, name, timestamp, route_json FROM history ORDER BY timestamp DESC")
+            
+        rows = c.fetchall()
+        conn.close()
+        
+        # Przekształcamy dane z bazy na format, który React łatwo przeczyta
+        history = [
+            {"id": r[0], "name": r[1], "date": r[2], "route": json.loads(r[3])} 
+            for r in rows
+        ]
+        return jsonify(history)
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
 if __name__ == "__main__":
     threading.Thread(target=simulator.simulate_drone, args=(drone, socketio), daemon=True).start()
     threading.Thread(target=simulator.telemetry_loop, args=(drone, socketio), daemon=True).start()
-    threading.Thread(target=simulator.audio_stream, args=(socketio,), daemon=True).start()
-    threading.Thread(target=simulator.video_stream, args=(socketio,), daemon=True).start()
+    # threading.Thread(target=simulator.audio_stream, args=(socketio,), daemon=True).start()
+    threading.Thread(target=simulator.video_stream, args=(socketio,drone), daemon=True).start()
 
     socketio.run(app, debug=True)

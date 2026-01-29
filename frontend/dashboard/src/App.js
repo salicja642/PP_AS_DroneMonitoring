@@ -2,7 +2,6 @@ import { BrowserRouter as Router, Routes, Route, Link, useNavigate, useLocation 
 import Login from "./pages/Login";
 import Home from "./pages/Home";
 import Telemetry from "./pages/Telemetry";
-import AudioAnalysis from "./pages/AudioAnalysis";
 import { useState } from "react";
 
 import { 
@@ -50,7 +49,6 @@ function NavTabs() {
     >
       <Tab label="Start" icon={<HomeIcon />} iconPosition="start" value="/" />
       <Tab label="Telemetria" icon={<SensorsIcon />} iconPosition="start" value="/telemetry" />
-      <Tab label="Informacje" icon={<AudiotrackIcon />} iconPosition="start" value="/audio" />
     </Tabs>
   );
 }
@@ -71,7 +69,6 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/telemetry" element={<Telemetry />} />
-          <Route path="/audio" element={<AudioAnalysis />} />
         </Routes>
       </Box>
     </Router>

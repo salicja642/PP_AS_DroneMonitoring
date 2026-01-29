@@ -8,6 +8,8 @@ import ControlPanel from "../components_telemetry/ControlPanel.js";
 import TelemetryPanel from "../components_telemetry/TelemetryPanel.js";
 import DroneCharts from "../components_telemetry/DroneCharts.js";
 import DroneMap from "../components_telemetry/DroneMap.js";
+import MissionHistory from "../components_telemetry/MissionHistory.js";
+import { useLocation } from "react-router-dom";
 
 const theme = createTheme({
   typography: {fontFamily: "Roboto, sans-serif"},
@@ -22,6 +24,19 @@ function Telemetry() {
   const [videoFrame, setVideoFrame] = useState(null);
   const isPausedRef = useRef(true);
   const isInMissionRef = useRef(false);
+  const location = useLocation();
+
+useEffect(() => {
+  const params = new URLSearchParams(location.search);
+  const selectedModel = params.get("model");
+
+  if (selectedModel) {
+    console.log("Wykryto wybór modelu z URL:", selectedModel);
+    // Wysyłamy do backendu już ze strony Telemetrii
+    fetch(`http://localhost:5000/select_drone/${selectedModel}`)
+      .catch(err => console.error("Błąd synchronizacji modelu:", err));
+  }
+}, [location]);
 
   //Połączenie z backendem przez WebSocket
 
@@ -34,8 +49,8 @@ function Telemetry() {
     const socket = io("http://127.0.0.1:5000");
     socket.on("telemetry", (newData) => setData(newData));
     socket.on("video_frame", (frame) => {
-      if (isPausedRef.current || !isInMissionRef.current) return;
-      setVideoFrame(`data:image/jpeg;base64,${frame}`);
+  // Usuwamy return, żeby zawsze wyświetlać to, co przychodzi z backendu
+      setVideoFrame(frame);
     });
 
     return () => {
@@ -127,44 +142,58 @@ const handleMapClick = (e) => {
   console.log("is_paused:", data.is_paused);
 
   return (
-    <div style={{display: "flex", gap: "20px", padding: 20, fontFamily: "Arial, sans-serif",}}>
-      <Box sx={{ display: "flex", gap: "20px", padding: 3, alignItems: "stretch" }}></Box>
-      <ThemeProvider theme={theme}>
-        
-          {/* LEWA KOLUMNA */}
-        
-        <Stack spacing={2}>
-          <ControlPanel 
-            handleControl={handleControl}
-            saveStartPoint={saveStartPoint}
-            setIsDrawing={setIsDrawing}
-            startMission={startMission}
-            setRoute={setRoute}
-          />
-             
-          <TelemetryPanel 
-            data={data} 
-            videoFrame={videoFrame} 
-          />
-        </Stack>    
-                  
-        {/* PRAWA KOLUMNA (MAPA) */}    
-        <Box sx={{ flex:2 }}>
-          <DroneMap 
-            data={data}
-            isDrawing={isDrawing}
-            route={route}            
-            startPoint={startPoint}
-            MapEventHandlers={MapEventHandlers}
-          />
-            
-          <DroneCharts data={data} />
-            
-        </Box>
-        
-      </ThemeProvider>
-    </div>
-  );
-}
 
-export default Telemetry;
+      <div style={{display: "flex", gap: "20px", padding: "20px", fontFamily: "Arial, sans-serif", height: "100vh", overflow: "hidden"}}>
+        <ThemeProvider theme={theme}>
+          <Stack spacing={1.8}>
+
+            <ControlPanel
+              handleControl={handleControl}
+              saveStartPoint={saveStartPoint}
+              setIsDrawing={setIsDrawing}
+              startMission={startMission}
+              setRoute={setRoute}
+              route={route}
+            />
+
+            <TelemetryPanel
+              data={data}
+              videoFrame={videoFrame}
+              setRoute={setRoute}
+              route={route}
+            />
+          </Stack>    
+                  
+          {/* PRAWA KOLUMNA (MAPA) */}    
+
+          <Box sx={{ 
+            flex: 1.8, 
+            height: "100vh",      // Zajmuje 100% wysokości ekranu
+            overflowY: "auto",   // TYLKO ta kolumna będzie się przewijać, jeśli mapa + wykresy zajmą za dużo miejsca
+            paddingRight: "10px", // Trochę miejsca na pasek przewijania
+            display: "flex",
+            flexDirection: "column",
+            gap: "20px",
+            boxSizing: "border-box"
+          }}>
+
+            
+            <DroneMap
+              data={data}
+              isDrawing={isDrawing}
+              route={route}            
+              startPoint={startPoint}
+              MapEventHandlers={MapEventHandlers}
+            />
+
+            <DroneCharts data={data} />
+
+          </Box>
+        </ThemeProvider>
+      </div>
+    );
+  }
+
+
+
+  export default Telemetry;

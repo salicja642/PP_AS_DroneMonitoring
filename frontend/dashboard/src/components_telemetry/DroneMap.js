@@ -20,47 +20,51 @@ const DroneMap = ({ data, isDrawing, route, startPoint, MapEventHandlers }) => {
     const currentFullRoute = startPoint ? [startPoint, ...route] : route;
     const currentPolylinePositions = currentFullRoute.map(p => [p.lat, p.lng]);
     return (
-    <Box sx={{ flex: 2 }}>
+    <Box sx={{ width: "100%", height: "auto"}}>
       <Typography variant="h6" sx={{ mb: 2, fontSize: "20px", fontWeight: 500 }}>
         POZYCJA DRONA
       </Typography>
 
       {data.latitude && data.longitude ? (
-        <MapContainer
-          center={[data.latitude, data.longitude]}
-          zoom={14}
-          style={{
-            height: "500px",
-            width: "100%",
-            borderRadius: "10px",
-            border: "1px solid #aaa",
-          }}
-        >
-          <TileLayer
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            attribution='&copy; OpenStreetMap'
-          />
-          <MapEventHandlers />
-          
-          <Marker position={[data.latitude, data.longitude]} icon={droneIcon}>
-            <Popup>
-              <b>Dron</b><br />
-              Lat: {data.latitude}<br />
-              Lon: {data.longitude}
-            </Popup>
-          </Marker>
+        <div style={{ height: "500px", width: "100%" }}> {/* Dodatkowy div pomocniczy */}
+          <MapContainer
+            center={[data.latitude, data.longitude]}
+            zoom={14}
+            scrollWheelZoom={true} // Włącz to, skoro mamy przewijaną kolumnę
+            style={{
+              height: "100%", // Teraz bierze 100% z tych 500px powyżej
+              width: "100%",
+              borderRadius: "10px",
+              border: "1px solid #aaa",
+              zIndex: 1
+            }}
+          >
+            <TileLayer
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              attribution='&copy; OpenStreetMap'
+            />
+            <MapEventHandlers />
+            
+            <Marker position={[data.latitude, data.longitude]} icon={droneIcon}>
+              <Popup>
+                <b>Dron</b><br />
+                Lat: {data.latitude}<br />
+                Lon: {data.longitude}
+              </Popup>
+            </Marker>
 
-          {isDrawing && currentFullRoute.length > 1 && (
-            <>
-              {currentFullRoute.map((point, index) => (
-                <Marker key={point.id} position={[point.lat, point.lng]} icon={pinIcon}>
-                  <Popup>Punkt {index + 1}</Popup>
-                </Marker>
-              ))}
-              <Polyline positions={currentPolylinePositions} color="red" />
-            </>
-          )}
-        </MapContainer>
+            {isDrawing && currentFullRoute.length > 1 && (
+              <>
+                {currentFullRoute.map((point, index) => (
+                  <Marker key={point.id} position={[point.lat, point.lng]} icon={pinIcon}>
+                    <Popup>Punkt {index + 1}</Popup>
+                  </Marker>
+                ))}
+                <Polyline positions={currentPolylinePositions} color="red" />
+              </>
+            )}
+          </MapContainer>
+        </div>
       ) : (
         <p>Ładowanie lokalizacji…</p>
       )}

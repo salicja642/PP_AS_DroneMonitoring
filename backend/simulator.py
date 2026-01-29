@@ -4,6 +4,8 @@ import base64
 import wave
 from utils import reached_target, distance
 import random
+import time
+import os
 
 def simulate_drone(drone, socketio):
     """Pętla czuwania: obsługuje zużycie baterii, gdy dron nie jest w misji."""
@@ -25,20 +27,58 @@ def telemetry_loop(drone, socketio):
         socketio.sleep(1)
 
 
-def video_stream(socketio):
-    cap = cv2.VideoCapture("drone_video.mp4") 
+def video_stream(socketio, drone):
+    cap = None  # Na starcie kamera jest wyłączona
+    is_live = False
+
     while True:
-        ret, frame = cap.read()
-        if not ret:
-            cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
-            continue
+        # WARUNEK: Kamera działa tylko gdy trwa misja I dron nie jest zapauzowany
+        if drone.is_in_mission and not drone.is_paused:
+            
+            # Jeśli kamera nie jest zainicjalizowana, spróbuj ją otworzyć
+            if cap is None or not cap.isOpened():
+                print("SYSTEM: Inicjalizacja źródła obrazu...")
+                cap = cv2.VideoCapture(0)  # Próba otwarcia fizycznej kamery
+                is_live = True
 
-        frame = cv2.resize(frame, (640, 360))
-        _, buffer = cv2.imencode(".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), 70])
-        frame_base64 = base64.b64encode(buffer).decode("utf-8")
+                if not cap.isOpened():
+                    print("SYSTEM: Fizyczna kamera niedostępna. Uruchamiam film backupowy.")
+                    cap = cv2.VideoCapture("drone_video.mp4")
+                    is_live = False
 
-        socketio.emit("video_frame", frame_base64)
-        socketio.sleep(0.05)  
+            ret, frame = cap.read()
+            
+            if ret:
+                # 1. Rozmiar klatki (optymalizacja pod transfer)
+                frame = cv2.resize(frame, (640, 360))
+                
+                # 2. Dodanie prostego statusu na obrazie
+                status_text = "LIVE" if is_live else "BACKUP VIDEO"
+                color = (0, 255, 0) if is_live else (0, 165, 255)
+                cv2.putText(frame, status_text, (15, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, color, 2)
+
+                # 3. Konwersja do Base64
+                _, buffer = cv2.imencode(".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), 70])
+                frame_base64 = base64.b64encode(buffer).decode("utf-8")
+                
+                # 4. Wysyłka do Reacta
+                socketio.emit("video_frame", f"data:image/jpeg;base64,{frame_base64}")
+            else:
+                # Jeśli to był film i się skończył - zacznij od nowa
+                if not is_live:
+                    cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+        
+        else:
+            # JEŚLI PAUZA LUB KONIEC MISJI - Wyłączamy kamerę fizyczną
+            if cap is not None:
+                print("SYSTEM: Zwalnianie zasobów kamery (Pauza/Stop).")
+                cap.release()
+                cap = None
+                # Opcjonalnie czyścimy obraz w React (wysyłając pusty sygnał)
+                socketio.emit("video_frame", None)
+
+        # Czekaj chwilę, żeby nie obciążać procesora (ok. 10-15 FPS wystarczy)
+        socketio.sleep(0.07)
 
 def audio_stream(socketio):
     """Strumieniowanie dźwięku silnika drona."""
@@ -81,11 +121,13 @@ def simulate_flight(drone, socketio, mission_id):
                 print("MISSION: Flight paused mid-segment.")
                 break
             with drone._lock:
-                drone.latitude += (wp["lat"] - drone.latitude) / 50
-                drone.longitude += (wp["lng"] - drone.longitude) / 50
+                move_divisor = 50 / drone.speed_multiplier
+                drone.latitude += (wp["lat"] - drone.latitude) / move_divisor
+                drone.longitude += (wp["lng"] - drone.longitude) / move_divisor
+                min_s, max_s = drone.max_speed_range
                 drone.speed = round(random.uniform(5, 12), 2)
-                drone.altitude = round(random.uniform(90, 110), 2)
-                drone.battery = max(0, drone.battery - 0.02)
+                drone.altitude = round(random.uniform(min_s, max_s), 2)
+                drone.battery = max(0, drone.battery - drone.drain_rate)
             
             socketio.emit("telemetry", drone.get_telemetry())
             socketio.sleep(0.1)     
