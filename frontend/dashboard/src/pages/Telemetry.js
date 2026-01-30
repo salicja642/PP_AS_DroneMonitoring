@@ -31,7 +31,11 @@ useEffect(() => {
 
   if (selectedModel) {
     console.log("Wykryto wybór modelu z URL:", selectedModel);
-    fetch(`http://localhost:5000/select_drone/${selectedModel}`)
+    
+    // Używamy zmiennej procesowej zamiast sztywnego adresu localhost
+    fetch(`${process.env.REACT_APP_API_URL}/select_drone/${selectedModel}`)
+      .then(response => response.json())
+      .then(data => console.log("Model zsynchronizowany z backendem:", data))
       .catch(err => console.error("Błąd synchronizacji modelu:", err));
   }
 }, [location]);
@@ -43,7 +47,7 @@ useEffect(() => {
   }, [data.is_paused, data.is_in_mission]);
 
   useEffect(() => {
-    const socket = io("http://127.0.0.1:5000");
+    const socket = io(process.env.REACT_APP_API_URL);
     socket.on("telemetry", (newData) => setData(newData));
     socket.on("video_frame", (frame) => {
       setVideoFrame(frame);
@@ -59,7 +63,7 @@ useEffect(() => {
 
 const handleControl = async (action) => {
   try {
-    const res = await fetch(`/control/${action}`);
+    const res = await fetch(`${process.env.REACT_APP_API_URL}/control/${action}`);
     const json = await res.json();
     console.log("Odpowiedź backendu:", json);
     } catch (err) {
@@ -102,7 +106,7 @@ const handleMapClick = (e) => {
       setStartPoint({ lat: data.latitude, lng: data.longitude, id: 'static_start' });
     }
 
-    await fetch("/start_mission", {
+    await fetch(`${process.env.REACT_APP_API_URL}/start_mission`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(fullRouteToBackend), 
@@ -122,7 +126,7 @@ const handleMapClick = (e) => {
 
         if (!data.is_in_mission) { 
             const { lat, lng } = e.latlng;
-            await fetch("/update_position", {
+            await fetch(`${process.env.REACT_APP_API_URL}/update_position`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ lat, lng }),

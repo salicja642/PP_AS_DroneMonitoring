@@ -16,7 +16,7 @@ const MissionHistory = ({ route, setRoute }) => {
 
   const loadHistory = async () => {
     try {
-      const res = await fetch(`/get_history?search=${search}`);
+      const res = await fetch(`${process.env.REACT_APP_API_URL}/get_history?search=${search}`);
       const data = await res.json();
       setHistory(data);
     } catch (error) {
@@ -32,7 +32,7 @@ const MissionHistory = ({ route, setRoute }) => {
     if (route.length === 0) return;
 
     try {
-      const response = await fetch("/save_route", {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/save_route`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
