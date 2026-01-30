@@ -15,7 +15,15 @@ const theme = createTheme({
 });
 
 function Telemetry() {
-  const [data, setData] = useState({});
+  const [data, setData] = useState({
+    latitude: 52.237049,
+    longitude: 21.017532,
+    is_running: false,
+    is_in_mission: false,
+    is_paused: false,
+    battery: 100,
+    speed: 0
+  });
   const [route, setRoute] = useState([]);  
   const [isDrawing, setIsDrawing] = useState(false); 
   const [startPoint, setStartPoint] = useState(null);
@@ -49,7 +57,7 @@ useEffect(() => {
   useEffect(() => {
       const socket = io(process.env.REACT_APP_API_URL, {
           transports: ["polling", "websocket"], // Kolejność ma znaczenie!
-          withCredentials: true
+          // withCredentials: true
       });
     socket.on("telemetry", (newData) => {
         console.log("Otrzymano dane:", newData); // Sprawdźmy w konsoli czy płyną
