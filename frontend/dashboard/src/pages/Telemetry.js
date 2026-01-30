@@ -47,8 +47,14 @@ useEffect(() => {
   }, [data.is_paused, data.is_in_mission]);
 
   useEffect(() => {
-    const socket = io(process.env.REACT_APP_API_URL);
-    socket.on("telemetry", (newData) => setData(newData));
+      const socket = io(process.env.REACT_APP_API_URL, {
+          transports: ["polling", "websocket"], // Kolejność ma znaczenie!
+          withCredentials: true
+      });
+    socket.on("telemetry", (newData) => {
+        console.log("Otrzymano dane:", newData); // Sprawdźmy w konsoli czy płyną
+        setData(newData);
+    });
     socket.on("video_frame", (frame) => {
       setVideoFrame(frame);
     });

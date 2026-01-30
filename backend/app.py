@@ -10,7 +10,13 @@ from flask_cors import CORS
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
-socketio = SocketIO(app, cors_allowed_origins="*")
+socketio = SocketIO(
+    app, 
+    cors_allowed_origins="*", 
+    async_mode='gevent', 
+    logger=True, 
+    engineio_logger=True
+)
 
 drone = Drone()
 
