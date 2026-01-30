@@ -6,8 +6,10 @@ import sqlite3
 from drone import Drone
 import simulator
 import json
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 socketio = SocketIO(app, cors_allowed_origins="*")
 
 drone = Drone()
