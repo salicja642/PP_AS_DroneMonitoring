@@ -5,6 +5,7 @@ from utils import reached_target, distance
 import random
 import time
 import os
+import numpy as np
 
 def simulate_drone(drone, socketio):
     """Pętla czuwania: obsługuje zużycie baterii, gdy dron nie jest w misji."""
@@ -71,13 +72,24 @@ def generate_frames(drone):
                 continue
                 
             frame = cv2.resize(frame, (480, 270))
-            _, buffer = cv2.imencode('.jpg', frame, [int(cv2.IMWRITE_JPEG_QUALITY), 60])
-            frame_bytes = buffer.tobytes()
-            
-            yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
         else:
-            time.sleep(0.5)
+            # Tworzymy czarną klatkę, gdy misja nie trwa (zamiast tylko spać)
+            # To zapobiega błędowi 500, bo strumień cały czas coś wysyła
+            frame = np.zeros((270, 480, 3), dtype=np.uint8)
+            cv2.putText(frame, "WAITING FOR MISSION...", (100, 135), 
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
+            time.sleep(0.5) # Oszczędzamy procesor w trybie czuwania
+
+        # Kodowanie klatki do formatu JPEG
+        ret, buffer = cv2.imencode('.jpg', frame, [int(cv2.IMWRITE_JPEG_QUALITY), 60])
+        if not ret:
+            continue
+            
+        frame_bytes = buffer.tobytes()
+        
+        # Kluczowy format MJPEG
+        yield (b'--frame\r\n'
+               b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
 '''
 def audio_stream(socketio):
     """Strumieniowanie dźwięku silnika drona."""
