@@ -5,7 +5,7 @@ import MissionHistory from "../components_telemetry/MissionHistory.js";
 const TelemetryPanel = ({ data, videoFrame, setRoute, route }) => {
   const inputStyle = { border: "1px solid #4c5ef7", borderRadius: 1, px: 1, py: 0.5, width: 200 };
   
-  const audioRef = useRef(new Audio(`${process.env.REACT_APP_API_URL}/audio`));
+  const audioRef = useRef(new Audio("https://drone-backend-rxt2.onrender.com/audio"));
 
   useEffect(() => {
     const audio = audioRef.current;
