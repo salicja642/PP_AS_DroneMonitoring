@@ -28,46 +28,35 @@ def telemetry_loop(drone, socketio):
 
 def video_stream(socketio, drone):
     cap = None  
-    is_live = False
+    video_path = os.path.join(os.path.dirname(__file__), "drone_video.mp4")
 
     while True:
         if drone.is_in_mission and not drone.is_paused:
-            
             if cap is None or not cap.isOpened():
-                print("SYSTEM: Inicjalizacja źródła obrazu...")
-                cap = cv2.VideoCapture(0)  
-                is_live = True
-
-                if not cap.isOpened():
-                    print("SYSTEM: Fizyczna kamera niedostępna. Uruchamiam film backupowy.")
-                    cap = cv2.VideoCapture("drone_video.mp4")
-                    is_live = False
+                print(f"SYSTEM: Otwieranie pliku wideo: {video_path}")
+                cap = cv2.VideoCapture(video_path)
 
             ret, frame = cap.read()
             
-            if ret:
-                frame = cv2.resize(frame, (640, 360))
-                
-                status_text = "LIVE" if is_live else "BACKUP VIDEO"
-                color = (0, 255, 0) if is_live else (0, 165, 255)
-                cv2.putText(frame, status_text, (15, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, color, 2)
+            if ret:                
+                frame = cv2.resize(frame, (480, 270)) 
+                cv2.putText(frame, "SIMULATED FEED", (10, 25), 
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
 
-                _, buffer = cv2.imencode(".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), 70])
+                _, buffer = cv2.imencode(".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), 60])
                 frame_base64 = base64.b64encode(buffer).decode("utf-8")
                 
                 socketio.emit("video_frame", f"data:image/jpeg;base64,{frame_base64}")
             else:
-                if not is_live:
-                    cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+                cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
         
         else:
             if cap is not None:
-                print("SYSTEM: Zwalnianie zasobów kamery (Pauza/Stop).")
                 cap.release()
                 cap = None
                 socketio.emit("video_frame", None)
-
-        socketio.sleep(0.07)
+                
+        socketio.sleep(0.1)
 '''
 def audio_stream(socketio):
     """Strumieniowanie dźwięku silnika drona."""
