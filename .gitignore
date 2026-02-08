@@ -4,8 +4,7 @@
 backend/venv/
 backend/__pycache__/
 *.pyc
-backend/drone_video.mp4
-backend/drone_engine_audio.wav
+
 
 # Node / Frontend
 node_modules/
