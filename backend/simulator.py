@@ -55,8 +55,29 @@ def video_stream(socketio, drone):
                 cap.release()
                 cap = None
                 socketio.emit("video_frame", None)
-                
+
         socketio.sleep(0.1)
+
+
+def generate_frames(drone):
+    video_path = os.path.join(os.path.dirname(__file__), "drone_video.mp4")
+    cap = cv2.VideoCapture(video_path)
+    
+    while True:
+        if drone.is_in_mission and not drone.is_paused:
+            ret, frame = cap.read()
+            if not ret:
+                cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+                continue
+                
+            frame = cv2.resize(frame, (480, 270))
+            _, buffer = cv2.imencode('.jpg', frame, [int(cv2.IMWRITE_JPEG_QUALITY), 60])
+            frame_bytes = buffer.tobytes()
+            
+            yield (b'--frame\r\n'
+                   b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
+        else:
+            time.sleep(0.5)
 '''
 def audio_stream(socketio):
     """Strumieniowanie dźwięku silnika drona."""

@@ -2,7 +2,7 @@ import React, { useEffect, useRef, memo } from "react";
 import { Paper, Stack, Typography, Input, Box, Grid } from "@mui/material";
 import MissionHistory from "../components_telemetry/MissionHistory.js";
 
-const TelemetryPanel = ({ data, videoFrame, setRoute, route }) => {
+const TelemetryPanel = ({ data, setRoute, route }) => {
   const inputStyle = { border: "1px solid #4c5ef7", borderRadius: 1, px: 1, py: 0.5, width: 200 };
   
   const audioRef = useRef(null);
@@ -28,7 +28,7 @@ const TelemetryPanel = ({ data, videoFrame, setRoute, route }) => {
         // to po prostu czekamy na następną zmianę lub kliknięcie.
         console.warn("Audio zablokowane - czekam na interakcję z UI");
       });
-      
+
     } else if (audioRef.current) {
       audioRef.current.pause();
     }
@@ -93,8 +93,12 @@ const TelemetryPanel = ({ data, videoFrame, setRoute, route }) => {
       {/* Sekcja Video */}
       <Paper elevation={3} sx={{ p: 2, borderRadius: 2, bgcolor: "#f8f9fa" }}>
         <Box sx={{ height: 200, display: "flex", alignItems: "center", justifyContent: "center", mb: 2, bgcolor: "#000", borderRadius: 1 }}>
-          {videoFrame ? (
-            <img src={videoFrame} alt="Dron" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center"}} />
+          {data.is_in_mission ? (
+            <img 
+              src="https://drone-backend-rxt2.onrender.com/video_feed" 
+              alt="Dron Live Feed" 
+              style={{ width: "100%", height: "100%", objectFit: "cover" }} 
+            />
           ) : (
             <Typography color="gray">Oczekiwanie na start misji...</Typography>
           )}

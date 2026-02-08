@@ -65,13 +65,9 @@ useEffect(() => {
         console.log("Otrzymano dane:", newData); // Sprawdźmy w konsoli czy płyną
         setData(newData);
     });
-    socket.on("video_frame", (frame) => {
-      setVideoFrame(frame);
-    });
 
     return () => {
       socket.off("telemetry");
-      socket.off("video_frame");
       socket.disconnect();
     };
   }, []);

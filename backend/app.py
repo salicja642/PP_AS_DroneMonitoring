@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, send_from_directory
+from flask import Flask, jsonify, request, send_from_directory, Response
 from flask_socketio import SocketIO
 import threading
 import time
@@ -87,6 +87,10 @@ def audio():
     base_dir = os.path.abspath(os.path.dirname(__file__))
     return send_from_directory(base_dir, "drone_engine_audio.wav", mimetype="audio/wav")
 
+@app.route('/video_feed')
+def video_feed():
+    return Response(generate_frames(drone),
+                    mimetype='multipart/x-mixed-replace; boundary=frame')
 
 @app.route("/control/<action>")
 def control(action):
@@ -175,6 +179,4 @@ def get_history():
 if __name__ == "__main__":
     threading.Thread(target=simulator.simulate_drone, args=(drone, socketio), daemon=True).start()
     threading.Thread(target=simulator.telemetry_loop, args=(drone, socketio), daemon=True).start()
-    threading.Thread(target=simulator.video_stream, args=(socketio,drone), daemon=True).start()
-
     socketio.run(app, debug=True)
