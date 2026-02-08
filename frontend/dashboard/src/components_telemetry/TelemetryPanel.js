@@ -5,21 +5,33 @@ import MissionHistory from "../components_telemetry/MissionHistory.js";
 const TelemetryPanel = ({ data, videoFrame, setRoute, route }) => {
   const inputStyle = { border: "1px solid #4c5ef7", borderRadius: 1, px: 1, py: 0.5, width: 200 };
   
-  const audioRef = useRef(new Audio("https://drone-backend-rxt2.onrender.com/audio"));
+  const audioRef = useRef(null);
+
+  // Funkcja pomocnicza, która tworzy obiekt audio, jeśli jeszcze go nie ma
+  const ensureAudioInitialized = () => {
+    if (!audioRef.current) {
+      console.log("Inicjalizacja dźwięku silnika...");
+      const audio = new Audio("https://drone-backend-rxt2.onrender.com/audio");
+      audio.loop = true;
+      audioRef.current = audio;
+    }
+    return audioRef.current;
+  };
 
   useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    audio.loop = true;
-
+    // Jeśli flaga misji jest aktywna, próbujemy odpalić dźwięk
     if (data.is_in_mission && !data.is_paused) {
-      audio.play().catch(() => console.log("Czekam na interakcję użytkownika..."));
-    } else {
-      audio.pause();
+      const audio = ensureAudioInitialized();
+      
+      audio.play().catch((err) => {
+        // Jeśli to się nie uda (bo np. flaga zmieniła się automatycznie, a nie przez kliknięcie)
+        // to po prostu czekamy na następną zmianę lub kliknięcie.
+        console.warn("Audio zablokowane - czekam na interakcję z UI");
+      });
+    } else if (audioRef.current) {
+      audioRef.current.pause();
     }
   }, [data.is_in_mission, data.is_paused]);
-
 
   useEffect(() => {
     if (audioRef.current && data.speed !== undefined) {
@@ -30,7 +42,6 @@ const TelemetryPanel = ({ data, videoFrame, setRoute, route }) => {
 
   return (
     <Stack spacing={1.8}>
-      <audio ref={audioRef} src="/audio" loop />
       <Typography variant="h5" sx={{ mb: 1, fontSize: "20px", fontWeight: 500 }}>
         TELEMETRIA DRONA
       </Typography>
