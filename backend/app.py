@@ -7,6 +7,7 @@ from drone import Drone
 import simulator
 import json
 from flask_cors import CORS
+import os
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
@@ -83,7 +84,8 @@ def telemetry():
 
 @app.route("/audio")
 def audio():
-    return send_from_directory(".", "drone_engine_audio.wav", mimetype="audio/wav")
+    base_dir = os.path.abspath(os.path.dirname(__file__))
+    return send_from_directory(base_dir, "drone_engine_audio.wav", mimetype="audio/wav")
 
 
 @app.route("/control/<action>")
