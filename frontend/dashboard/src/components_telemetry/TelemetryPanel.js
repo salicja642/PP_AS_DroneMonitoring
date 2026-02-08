@@ -28,6 +28,7 @@ const TelemetryPanel = ({ data, videoFrame, setRoute, route }) => {
         // to po prostu czekamy na następną zmianę lub kliknięcie.
         console.warn("Audio zablokowane - czekam na interakcję z UI");
       });
+      
     } else if (audioRef.current) {
       audioRef.current.pause();
     }
