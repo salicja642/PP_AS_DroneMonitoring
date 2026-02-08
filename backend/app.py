@@ -89,7 +89,7 @@ def audio():
 
 @app.route('/video_feed')
 def video_feed():
-    return Response(generate_frames(drone),
+    return Response(simulator.generate_frames(drone),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
 @app.route("/control/<action>")
