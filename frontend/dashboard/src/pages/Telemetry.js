@@ -22,7 +22,9 @@ function Telemetry() {
     is_in_mission: false,
     is_paused: false,
     battery: 100,
-    speed: 0
+    speed: 0,
+    temperature: 40,
+    altitude: 100
   });
   const [route, setRoute] = useState([]);  
   const [isDrawing, setIsDrawing] = useState(false); 

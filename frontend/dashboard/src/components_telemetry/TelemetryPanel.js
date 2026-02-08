@@ -5,11 +5,13 @@ import MissionHistory from "../components_telemetry/MissionHistory.js";
 const TelemetryPanel = ({ data, videoFrame, setRoute, route }) => {
   const inputStyle = { border: "1px solid #4c5ef7", borderRadius: 1, px: 1, py: 0.5, width: 200 };
   
-  const audioRef = useRef(null);
+  const audioRef = useRef(new Audio(`${process.env.REACT_APP_API_URL}/audio`));
 
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
+
+    audio.loop = true;
 
     if (data.is_in_mission && !data.is_paused) {
       audio.play().catch(() => console.log("Czekam na interakcję użytkownika..."));
@@ -21,7 +23,8 @@ const TelemetryPanel = ({ data, videoFrame, setRoute, route }) => {
 
   useEffect(() => {
     if (audioRef.current && data.speed !== undefined) {
-      audioRef.current.playbackRate = 1 + (data.speed / 100);
+      const rate = 1 + (data.speed / 100);
+      audioRef.current.playbackRate = Math.min(Math.max(rate, 0.5), 4.0);
     }
   }, [data.speed]);
 

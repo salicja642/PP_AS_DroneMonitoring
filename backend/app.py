@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, send_file
+from flask import Flask, jsonify, request, send_from_directory
 from flask_socketio import SocketIO
 import threading
 import time
@@ -83,7 +83,7 @@ def telemetry():
 
 @app.route("/audio")
 def audio():
-    return send_file("drone_engine_audio.wav", mimetype="audio/wav")
+    return send_from_directory(".", "drone_engine_audio.wav", mimetype="audio/wav")
 
 
 @app.route("/control/<action>")

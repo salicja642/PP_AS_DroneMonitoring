@@ -68,7 +68,7 @@ def video_stream(socketio, drone):
                 socketio.emit("video_frame", None)
 
         socketio.sleep(0.07)
-
+'''
 def audio_stream(socketio):
     """Strumieniowanie dźwięku silnika drona."""
     try:
@@ -84,6 +84,13 @@ def audio_stream(socketio):
     except FileNotFoundError:
         print("Audio file not found, skipping audio stream.")
 
+def audio_stream(socketio):
+    """Informuje frontend o stanie dźwięku silnika."""
+    while True:
+        # Jeśli dron pracuje, wysyłaj sygnał "graj"
+        socketio.emit("engine_state", {"playing": True})
+        socketio.sleep(2)
+'''
 
 def simulate_flight(drone, socketio, mission_id):
     """Logika aktywnej misji drona po wyznaczonych punktach."""

@@ -61,3 +61,4 @@ function App() {
 }
 
 export default App;
+// do zmiany  w .env REACT_APP_API_URL=https://drone-backend-rxt2.onrender.com
