@@ -92,12 +92,12 @@ const TelemetryPanel = ({ data, setRoute, route }) => {
       
       {/* Sekcja Video */}
       <Paper elevation={3} sx={{ p: 2, borderRadius: 2, bgcolor: "#f8f9fa" }}>
-        <Box sx={{ height: 200, display: "flex", alignItems: "center", justifyContent: "center", mb: 2, bgcolor: "#000", borderRadius: 1 }}>
+        <Box sx={{ height: auto, display: "flex", alignItems: "center", justifyContent: "center", mb: 2, bgcolor: "#000", borderRadius: 1 }}>
           {data.is_in_mission ? (
             <img 
               src="https://drone-backend-rxt2.onrender.com/video_feed" 
               alt="Dron Live Feed" 
-              style={{ width: "100%", height: "100%", objectFit: "cover" }} 
+              style={{ width: auto, height: "100%", objectFit: "contain" }} 
             />
           ) : (
             <Typography color="gray">Oczekiwanie na start misji...</Typography>
