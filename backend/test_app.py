@@ -26,13 +26,13 @@ def test_login_endpoint(client):
     # Wysyłamy fake'owe żądanie do Twojego API
     response = client.post('/login', json={
         "username": "admin",
-        "password": "password123" # Podaj dane, które masz w bazie/kodzie
+        "password": "admin123" # Podaj dane, które masz w bazie/kodzie
     })
     
     # Sprawdzamy czy serwer odpowiedział (nawet jeśli błędem, to sprawdzamy strukturę)
     assert response.status_code in [200, 401] 
     if response.status_code == 200:
-        assert response.json['status'] == 'success'
+        assert response.json['status'] == 'ok'
 
 # TEST INTEGRACYJNY BAZY DANYCH
 def test_db_save_mission(client):
@@ -47,3 +47,34 @@ def test_db_save_mission(client):
     
     # Jeśli zapis się uda, serwer powinien zwrócić 200 lub 201
     assert response.status_code in [200, 201]
+
+
+
+# TEST INTEGRACYJNY: Walidacja punktu startowego
+def test_mission_start_point(client):
+    # Definiujemy trasę z konkretnym punktem startowym
+    test_route = [
+        {"lat": 52.2297, "lng": 21.0122}, # Warszawa
+        {"lat": 50.0647, "lng": 19.9450}  # Kraków
+    ]
+    
+    # Wysyłamy żądanie startu misji z tą trasą
+    response = client.post('/start_mission', json={
+        "mission_id": "test-1",
+        "route": test_route
+    })
+    
+    assert response.status_code == 200
+    
+    # Pobieramy aktualny stan drona po starcie (zakładając, że masz taki endpoint)
+    # Jeśli nie, testujemy bezpośrednio odpowiedź serwera
+    telemetry_resp = client.get('/telemetry')
+    current_route = telemetry_resp.json.get('route', [])
+    
+    if len(current_route) > 0:
+        # Sprawdzamy, czy pierwszy punkt to nie jest przypadkiem (0,0)
+        start_point = current_route[0]
+        assert start_point['lat'] != 0
+        assert start_point['lng'] != 0
+        # Sprawdzamy, czy pierwszy punkt zgadza się z wysłanym
+        assert start_point['lat'] == test_route[0]['lat']

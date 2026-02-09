@@ -96,36 +96,50 @@ const handleMapClick = (e) => {
     console.log("Dodano punkt do trasy:", { lat: roundedLat, lng: roundedLng });
   };
 
-  const saveStartPoint = () => {
-   
-    if (data.latitude && data.longitude) {
-      setStartPoint({ lat: data.latitude, lng: data.longitude, id: 'static_start' });
-      console.log("Statyczny punkt startowy zapisany.");
-    }
+const saveStartPoint = () => {
+  if (data.latitude && data.longitude) {
+    // 1. Czyścimy starą trasę, żeby nie było linii "przez całą mapę"
+    setRoute([]); 
+    
+    // 2. Generujemy unikalne ID dla punktu startowego
+    const newStart = { 
+      lat: data.latitude, 
+      lng: data.longitude, 
+      id: `start_${Date.now()}` // Unikalne ID za każdym razem
+    };
+    
+    setStartPoint(newStart);
+    console.log("Nowy punkt startowy zapisany:", newStart);
+  }
 };
 
-  const startMission = async () => {
-    if (route.length < 1) {
-      alert("Dodaj przynajmniej 1 punkt trasy!");
-      return;
-    }
+const startMission = async () => {
+  if (route.length < 1) {
+    alert("Dodaj przynajmniej 1 punkt trasy!");
+    return;
+  }
 
-    const fullRouteToBackend = data.latitude && data.longitude
-      ? [{ lat: data.latitude, lng: data.longitude, id: 'start' }, ...route]
-      : route;
-
-    if (data.latitude && data.longitude) {
-      setStartPoint({ lat: data.latitude, lng: data.longitude, id: 'static_start' });
-    }
-
-    await fetch(`${process.env.REACT_APP_API_URL}/start_mission`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(fullRouteToBackend), 
-    });
-
-    console.log("Misja rozpoczęta z punktami:", fullRouteToBackend);
+  // Używamy aktualnej pozycji drona jako punktu '0'
+  const actualStart = { 
+    lat: data.latitude, 
+    lng: data.longitude, 
+    id: `start_${Date.now()}` // Unikalne ID
   };
+
+  // Aktualizujemy startPoint w stanie, aby DroneMap go widział
+  setStartPoint(actualStart);
+
+  // Przygotowujemy trasę dla backendu (start + wyklikane punkty)
+  const fullRouteToBackend = [actualStart, ...route];
+
+  await fetch(`${process.env.REACT_APP_API_URL}/start_mission`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(fullRouteToBackend), 
+  });
+
+  console.log("Misja rozpoczęta z unikalnym punktem startowym:", actualStart);
+};
 
   function MapEventHandlers() { 
     const map = useMapEvents({
