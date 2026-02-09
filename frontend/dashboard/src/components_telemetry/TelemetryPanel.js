@@ -11,7 +11,8 @@ const TelemetryPanel = ({ data, setRoute, route }) => {
   const ensureAudioInitialized = () => {
     if (!audioRef.current) {
       console.log("Inicjalizacja dźwięku silnika...");
-      const audio = new Audio("https://drone-backend-rxt2.onrender.com/audio");
+      const audioUrl = `${process.env.REACT_APP_API_URL}/audio`;
+      const audio = new Audio(audioUrl);
       audio.loop = true;
       audioRef.current = audio;
     }
@@ -95,7 +96,7 @@ const TelemetryPanel = ({ data, setRoute, route }) => {
         <Box sx={{ height: "auto", display: "flex", alignItems: "center", justifyContent: "center", mb: 2, bgcolor: "#000", borderRadius: 1 }}>
           {data.is_in_mission ? (
             <img 
-              src="https://drone-backend-rxt2.onrender.com/video_feed" 
+              src={`${process.env.REACT_APP_API_URL}/video_feed`} 
               alt="Dron Live Feed" 
               style={{ width: "auto", height: "100%", objectFit: "contain" }} 
             />
