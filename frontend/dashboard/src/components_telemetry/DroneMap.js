@@ -1,9 +1,33 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Box, Typography } from "@mui/material";
-import { MapContainer, TileLayer, Marker, Popup, Polyline } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from "react-leaflet";
 import L from "leaflet"; 
 import "leaflet/dist/leaflet.css";
 
+const RecenterMap = ({ lat, lng, isInMission }) => {
+  const map = useMap();
+  const [hasCentered, setHasCentered] = React.useState(false);
+
+  // Kiedy misja się zaczyna, resetujemy flagę, 
+  // aby po zakończeniu misji (gdy isInMission znów będzie false) mapa mogła się wycentrować.
+  useEffect(() => {
+    if (isInMission) {
+      setHasCentered(false);
+    }
+  }, [isInMission]);
+
+  useEffect(() => {
+    // Centrujemy TYLKO GDY NIE MA MISJI i jeszcze tego nie zrobiliśmy
+    if (!isInMission && lat && lng && !hasCentered) {
+      map.flyTo([lat, lng], map.getZoom(), {
+        duration: 1.5,
+      });
+      setHasCentered(true);
+    }
+  }, [lat, lng, map, hasCentered, isInMission]);
+
+  return null;
+};
 const droneIcon = L.icon({
   iconUrl: "https://cdn-icons-png.flaticon.com/512/252/252025.png",
   iconSize: [32, 32],
@@ -25,7 +49,7 @@ const DroneMap = ({ data, isDrawing, route, startPoint, MapEventHandlers }) => {
         POZYCJA DRONA
       </Typography>
 
-      {data.latitude && data.longitude ? (
+      {data.latitude && data.longitude !==0 ? (
         <div style={{ height: "500px", width: "100%" }}> 
           <MapContainer
             center={[data.latitude, data.longitude]}
@@ -43,6 +67,7 @@ const DroneMap = ({ data, isDrawing, route, startPoint, MapEventHandlers }) => {
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               attribution='&copy; OpenStreetMap'
             />
+            <RecenterMap lat={data.latitude} lng={data.longitude} isInMission={data.is_in_mission} />
             <MapEventHandlers />
             
             <Marker position={[data.latitude, data.longitude]} icon={droneIcon}>

@@ -8,10 +8,10 @@ class Drone:
         # Stan drona
         self.altitude = 100
         self.speed = 0.0 
-        self.temperature = 40
+        self.temperature = 25
         self.battery = 100
-        self.latitude = round(random.uniform(52.2, 52.3), 6)
-        self.longitude = round(random.uniform(21.0, 21.1), 6)
+        self.latitude = 52.2297
+        self.longitude = 21.0122
         self.drain_rate = 0.02  
         self.speed_multiplier = 1.0
         self.max_speed_range = (10.0, 14.0)

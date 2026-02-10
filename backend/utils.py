@@ -17,7 +17,7 @@ def distance(lat1, lon1, lat2, lon2):
 def reached_target(current_lat, current_lng, target_lat, target_lng, threshold=4):
     """
     Sprawdza, czy dron jest wystarczająco blisko punktu docelowego.
-    Defaultowy próg to 4 metry.
+    Domyślny próg to 4 metry.
     """
     dist = distance(current_lat, current_lng, target_lat, target_lng)
 

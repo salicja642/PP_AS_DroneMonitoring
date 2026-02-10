@@ -42,7 +42,6 @@ useEffect(() => {
   if (selectedModel) {
     console.log("Wykryto wybór modelu z URL:", selectedModel);
     
-    // Używamy zmiennej procesowej zamiast sztywnego adresu localhost
     fetch(`${process.env.REACT_APP_API_URL}/select_drone/${selectedModel}`)
       .then(response => response.json())
       .then(data => console.log("Model zsynchronizowany z backendem:", data))
@@ -58,11 +57,10 @@ useEffect(() => {
 
   useEffect(() => {
       const socket = io(process.env.REACT_APP_API_URL, {
-          transports: ["polling", "websocket"], // Kolejność ma znaczenie!
-          // withCredentials: true
+          transports: ["polling", "websocket"], 
       });
     socket.on("telemetry", (newData) => {
-        console.log("Otrzymano dane:", newData); // Sprawdźmy w konsoli czy płyną
+        console.log("Otrzymano dane:", newData); 
         setData(newData);
     });
 
@@ -98,14 +96,12 @@ const handleMapClick = (e) => {
 
 const saveStartPoint = () => {
   if (data.latitude && data.longitude) {
-    // 1. Czyścimy starą trasę, żeby nie było linii "przez całą mapę"
     setRoute([]); 
     
-    // 2. Generujemy unikalne ID dla punktu startowego
     const newStart = { 
       lat: data.latitude, 
       lng: data.longitude, 
-      id: `start_${Date.now()}` // Unikalne ID za każdym razem
+      id: `start_${Date.now()}`
     };
     
     setStartPoint(newStart);
@@ -119,17 +115,14 @@ const startMission = async () => {
     return;
   }
 
-  // Używamy aktualnej pozycji drona jako punktu '0'
   const actualStart = { 
     lat: data.latitude, 
     lng: data.longitude, 
-    id: `start_${Date.now()}` // Unikalne ID
+    id: `start_${Date.now()}` 
   };
 
-  // Aktualizujemy startPoint w stanie, aby DroneMap go widział
   setStartPoint(actualStart);
 
-  // Przygotowujemy trasę dla backendu (start + wyklikane punkty)
   const fullRouteToBackend = [actualStart, ...route];
 
   await fetch(`${process.env.REACT_APP_API_URL}/start_mission`, {

@@ -104,23 +104,25 @@ def control(action):
             print("MISJA: Wznowiono.")
         else: 
             drone.is_running = True
-            drone.is_in_mission = True
             drone.is_paused = False
             print("MISJA: Rozpoczęto.")
 
     elif action == "stop": 
-        if is_mission_active:
+        if is_mission_active and not is_currently_paused:
             drone.is_paused = True
             print("MISJA: Wstrzymano (Pauza).")
         else: 
             drone.is_running = False
             drone.is_in_mission = False
+            drone.is_paused = False
+            drone.mission_route = []
             print("MISJA: Twardy stop symulacji.")
 
     return jsonify({
         "status": "ok", 
         "running": drone.is_running,
-        "is_paused": drone.is_paused
+        "is_paused": drone.is_paused,
+        "is_in_mission": drone.is_in_mission
     })
 
 @app.route("/update_position", methods=["POST"])
@@ -138,6 +140,9 @@ def save_route():
     name = data.get("name", "Bez nazwy")
     route = data.get("route", [])
     
+    if not route or len(route) == 0:
+        return jsonify({"status": "error", "message": "Nie można zapisać pustej trasy"}), 400
+
     try:
         conn = sqlite3.connect('drone_missions.db')
         c = conn.cursor()

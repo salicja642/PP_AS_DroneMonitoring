@@ -15,7 +15,7 @@ const ControlPanel = ({ handleControl, saveStartPoint, setIsDrawing, startMissio
           <Button variant="contained" color="error" startIcon={<Stop />} onClick={() => handleControl("stop")}>Stop</Button>
           <Button variant="contained" color="primary" startIcon={<EditIcon />} onClick={() => { saveStartPoint(); setIsDrawing(true); }}>Rysuj trasę</Button>
           <Button variant="contained" color="warning" startIcon={<RocketLaunch />} onClick={startMission}>Rozpocznij misję</Button>
-          <Button variant="contained" color="inherit" startIcon={<DeleteIcon />} onClick={() => setRoute([])}>Wyczyść trasę</Button>
+          <Button variant="contained" color="inherit" startIcon={<DeleteIcon />} onClick={() => {setRoute([]); handleControl("stop")}}>Wyczyść trasę</Button>
         </Stack>
       </Paper>
     </>
