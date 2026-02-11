@@ -8,8 +8,6 @@ const RecenterMap = ({ lat, lng, isInMission }) => {
   const map = useMap();
   const [hasCentered, setHasCentered] = React.useState(false);
 
-  // Kiedy misja się zaczyna, resetujemy flagę, 
-  // aby po zakończeniu misji (gdy isInMission znów będzie false) mapa mogła się wycentrować.
   useEffect(() => {
     if (isInMission) {
       setHasCentered(false);
@@ -17,7 +15,6 @@ const RecenterMap = ({ lat, lng, isInMission }) => {
   }, [isInMission]);
 
   useEffect(() => {
-    // Centrujemy TYLKO GDY NIE MA MISJI i jeszcze tego nie zrobiliśmy
     if (!isInMission && lat && lng && !hasCentered) {
       map.flyTo([lat, lng], map.getZoom(), {
         duration: 1.5,

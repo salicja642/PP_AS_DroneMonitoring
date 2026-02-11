@@ -7,7 +7,7 @@ const TelemetryPanel = ({ data, setRoute, route }) => {
   
   const audioRef = useRef(null);
 
-  // Funkcja pomocnicza, która tworzy obiekt audio, jeśli jeszcze go nie ma
+  
   const ensureAudioInitialized = () => {
     if (!audioRef.current) {
       console.log("Inicjalizacja dźwięku silnika...");
@@ -20,13 +20,12 @@ const TelemetryPanel = ({ data, setRoute, route }) => {
   };
 
   useEffect(() => {
-    // Jeśli flaga misji jest aktywna, próbujemy odpalić dźwięk
+    
     if (data.is_in_mission && !data.is_paused) {
       const audio = ensureAudioInitialized();
       
       audio.play().catch((err) => {
-        // Jeśli to się nie uda (bo np. flaga zmieniła się automatycznie, a nie przez kliknięcie)
-        // to po prostu czekamy na następną zmianę lub kliknięcie.
+       
         console.warn("Audio zablokowane - czekam na interakcję z UI");
       });
 
